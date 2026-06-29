@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Auto Care — Cuci Mobil Premium ke Garasi Anda</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+============================================================ */
+:root {
+  --gold:        #C9A84C;
+  --gold-light:  #E8C97A;
+  --gold-pale:   #F5E6B8;
+  --dark:        #0A0B0E;
+  --dark-2:      #111318;
+  --dark-3:      #191C24;
+  --surface:     #1A1D27;
+  --surface-2:   #20232E;
+  --border:      rgba(255,255,255,0.07);
+  --border-gold: rgba(201,168,76,0.25);
+  --text:        #E8E9EF;
+  --text-muted:  #6E7082;
+  --text-sub:    #9EA0B0;
+  --green:       #4CAF7A;
+}
+
+/* ============================================================
+   RESET & BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--dark);
+  font-family: 'Outfit', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: none;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+/* ============================================================
+   CUSTOM CURSOR
+============================================================ */
+.cursor-dot {
+  width: 6px; height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: transform 0.1s ease;
+}
+.cursor-ring {
+  width: 32px; height: 32px;
+  border: 1px solid rgba(201,168,76,0.5);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: transform 0.12s ease, width 0.2s, height 0.2s, border-color 0.2s;
+}
+.cursor-ring.hovered {
+  width: 50px; height: 50px;
+  border-color: var(--gold);
+}
+@media (pointer: coarse) { .cursor-dot, .cursor-ring { display: none; } body { cursor: auto; } }
+
+/* ============================================================
+   TYPOGRAPHY HELPERS
+============================================================ */
+.font-display  { font-family: 'Cormorant Garamond', serif; }
+.text-gold     { color: var(--gold); }
+.text-gold-lg  { color: var(--gold-light); }
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--gold-pale) 0%, var(--gold-light) 40%, var(--gold) 70%, #A87C30 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ============================================================
+   GRAIN + NOISE OVERLAY
+============================================================ */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9000; opacity: 0.5;
+}
+
+/* ============================================================
+   NAVBAR
+============================================================ */
+#navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  padding: 20px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: all 0.4s ease;
+}
+#navbar.scrolled {
+  background: rgba(10,11,14,0.92);
+  backdrop-filter: blur(20px);
+  padding: 14px 48px;
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.nav-logo span { color: var(--gold); }
+.nav-links { display: flex; gap: 36px; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
+.nav-links a { color: var(--text-muted); transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #0A0B0E; font-size: 13px; font-weight: 700;
+  letter-spacing: 0.06em; padding: 10px 24px; border-radius: 50px;
+  transition: all 0.3s ease; border: none; cursor: none;
+}
+.nav-cta:hover { box-shadow: 0 4px 20px rgba(201,168,76,0.4); transform: translateY(-1px); }
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: none; }
+.nav-hamburger span { display: block; width: 24px; height: 1.5px; background: var(--text); transition: all 0.3s; }
+
+@media (max-width: 768px) {
+  #navbar { padding: 18px 24px; }
+  #navbar.scrolled { padding: 14px 24px; }
+  .nav-links, .nav-cta { display: none; }
+  .nav-hamburger { display: flex; }
+}
+
+/* ============================================================
+   SECTION HELPERS
+============================================================ */
+.section { padding: 120px 0; position: relative; }
+.section-sm { padding: 80px 0; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+@media (max-width: 768px) { .container { padding: 0 24px; } .section { padding: 80px 0; } }
+
+.label-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 20px;
+}
+.label-tag::before, .label-tag::after {
+  content: ''; display: block; width: 24px; height: 1px; background: var(--gold); opacity: 0.5;
+}
+
+/* ============================================================
+   SCROLL REVEAL
+============================================================ */
+.reveal {
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-left  { opacity: 0; transform: translateX(-40px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal-left.visible  { opacity: 1; transform: translateX(0); }
+.reveal-right { opacity: 0; transform: translateX(40px);  transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+.delay-4 { transition-delay: 0.4s; }
+.delay-5 { transition-delay: 0.5s; }
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+  background-size: 200% auto;
+  color: #0A0B0E; font-weight: 700; font-size: 14px; letter-spacing: 0.06em;
+  padding: 16px 36px; border-radius: 50px; border: none; cursor: none;
+  transition: background-position 0.4s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+.btn-primary:hover {
+  background-position: right center;
+  box-shadow: 0 8px 32px rgba(201,168,76,0.45);
+  transform: translateY(-2px);
+}
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  background: transparent; color: var(--text); font-weight: 500; font-size: 14px;
+  letter-spacing: 0.04em; padding: 16px 36px; border-radius: 50px;
+  border: 1px solid var(--border); cursor: none;
+  transition: all 0.3s ease;
+}
+.btn-secondary:hover { border-color: var(--border-gold); color: var(--gold-light); }
+
+/* ============================================================
+   ① HERO SECTION
+============================================================ */
+#hero {
+  min-height: 100vh; display: flex; align-items: center;
+  position: relative; overflow: hidden;
+  padding-top: 100px;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 60% 40%, rgba(201,168,76,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at 10% 80%, rgba(201,168,76,0.04) 0%, transparent 50%),
+    linear-gradient(180deg, #0A0B0E 0%, #0E1016 100%);
+}
+.hero-grid {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.04;
+  background-image: linear-gradient(rgba(201,168,76,1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(201,168,76,1) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 100%);
+}
+.hero-orb-1 {
+  position: absolute; width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  top: -100px; right: -100px; animation: float1 8s ease-in-out infinite;
+}
+.hero-orb-2 {
+  position: absolute; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+  bottom: 100px; left: -50px; animation: float2 10s ease-in-out infinite;
+}
+@keyframes float1 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(-20px,30px);} }
+@keyframes float2 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(20px,-20px);} }
+
+.hero-content { position: relative; z-index: 1; max-width: 800px; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(201,168,76,0.08); border: 1px solid var(--border-gold);
+  padding: 8px 20px; border-radius: 50px; font-size: 12px;
+  font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold);
+  margin-bottom: 32px; animation: fadeDown 0.8s ease forwards;
+}
+@keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(52px, 7vw, 96px); font-weight: 700;
+  line-height: 1.0; letter-spacing: -0.02em;
+  margin-bottom: 28px;
+  animation: fadeUp 1s 0.2s ease both;
+}
+.hero-title em { font-style: italic; color: var(--gold-light); }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+
+.hero-sub {
+  font-size: 17px; line-height: 1.75; color: var(--text-sub);
+  max-width: 580px; margin-bottom: 48px;
+  animation: fadeUp 1s 0.4s ease both;
+}
+.hero-ctas {
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  animation: fadeUp 1s 0.6s ease both;
+}
+.hero-trust {
+  display: flex; align-items: center; gap: 32px; margin-top: 64px; flex-wrap: wrap;
+  animation: fadeUp 1s 0.8s ease both;
+}
+.trust-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 500; color: var(--text-muted);
+}
+.trust-item strong { color: var(--text); font-weight: 600; }
+.trust-divider { width: 1px; height: 32px; background: var(--border); }
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: fadeUp 1s 1.2s ease both; z-index: 1;
+}
+.scroll-indicator span { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); }
+.scroll-line { width: 1px; height: 48px; background: linear-gradient(to bottom, transparent, var(--gold), transparent); animation: scrollPulse 2s ease infinite; }
+@keyframes scrollPulse { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
+
+/* ============================================================
+   ② PAIN POINT SECTION
+============================================================ */
+#pain {
+  background: var(--dark-2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+@media (max-width: 900px) { .pain-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+.pain-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.stat-card {
+  background: var(--dark-3); border: 1px solid var(--border); border-radius: 16px;
+  padding: 28px 24px; position: relative; overflow: hidden;
+  transition: border-color 0.3s;
+}
+.stat-card:hover { border-color: var(--border-gold); }
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;  transition: opacity 0.3s;
+}
+.stat-card:hover::before { opacity: 1; }
+.stat-num {
+  font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 700;
+  line-height: 1; color: var(--gold-light); margin-bottom: 8px;
+}
+.stat-label { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+/* ============================================================
+   ③ SOLUTION SECTION
+============================================================ */
+#solution { background: var(--dark); }
+.solution-inner {
+  text-align: center; max-width: 760px; margin: 0 auto 80px;
+}
+.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+@media (max-width: 900px) { .feature-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .feature-grid { grid-template-columns: 1fr; } }
+
+.feature-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+  padding: 36px 28px; transition: all 0.4s ease; position: relative; overflow: hidden;
+}
+.feature-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0;
+  background: linear-gradient(to top, rgba(201,168,76,0.04), transparent);
+  transition: height 0.4s ease;
+}
+.feature-card:hover { transform: translateY(-6px); border-color: var(--border-gold); }
+.feature-card:hover::after { height: 100%; }
+.feature-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(201,168,76,0.08); border: 1px solid var(--border-gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin-bottom: 20px;
+}
+.feature-title { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+.feature-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+/* ============================================================
+   ④ HOW IT WORKS
+============================================================ */
+#howto { background: var(--dark-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.steps-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; position: relative; }
+.steps-wrapper::before {
+  content: ''; position: absolute; top: 40px; left: calc(16.66% + 20px); right: calc(16.66% + 20px);
+  height: 1px; background: linear-gradient(90deg, var(--gold), rgba(201,168,76,0.2), var(--gold));
+  opacity: 0.4;
+}
+@media (max-width: 768px) { .steps-wrapper { grid-template-columns: 1fr; gap: 48px; } .steps-wrapper::before { display: none; } }
+
+.step-item { padding: 0 32px; text-align: center; }
+.step-num {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--dark-3); border: 1px solid var(--border-gold);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 28px;
+  font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 700;
+  color: var(--gold-light); position: relative; z-index: 1;
+  transition: all 0.4s ease;
+}
+.step-item:hover .step-num {
+  background: rgba(201,168,76,0.1); box-shadow: 0 0 40px rgba(201,168,76,0.2);
+}
+.step-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+.step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+/* ============================================================
+   ⑤ PRICING
+============================================================ */
+#pricing { background: var(--dark); }
+.pricing-header { text-align: center; margin-bottom: 64px; }
+.toggle-pill {
+  display: inline-flex; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 50px; padding: 4px; gap: 4px; margin-top: 32px;
+}
+.toggle-btn {
+  padding: 10px 28px; border-radius: 50px; font-size: 13px; font-weight: 500;
+  cursor: none; border: none; transition: all 0.25s ease;
+  background: transparent; color: var(--text-muted);
+}
+.toggle-btn.active { background: var(--surface-2); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.savings-badge {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  background: rgba(201,168,76,0.15); color: var(--gold); padding: 3px 10px; border-radius: 50px;
+}
+
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; }
+@media (max-width: 900px) { .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; } }
+
+.p-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+  padding: 40px 32px; display: flex; flex-direction: column;
+  position: relative; overflow: hidden; transition: all 0.4s ease;
+}
+.p-card:hover { transform: translateY(-8px); box-shadow: 0 40px 80px rgba(0,0,0,0.4); }
+.p-card.featured {
+  background: linear-gradient(160deg, #1F2236 0%, #161926 100%);
+  border-color: rgba(201,168,76,0.3);
+  box-shadow: 0 0 80px rgba(201,168,76,0.08), 0 20px 40px rgba(0,0,0,0.4);
+}
+.p-card.featured:hover { box-shadow: 0 0 100px rgba(201,168,76,0.14), 0 40px 80px rgba(0,0,0,0.5); }
+.p-card-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201,168,76,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.popular-badge {
+  position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  color: #0A0B0E; font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+  text-transform: uppercase; padding: 6px 20px; border-radius: 0 0 12px 12px;
+  white-space: nowrap;
+}
+.p-tier { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.p-tier.gold { color: var(--gold); }
+.p-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+.p-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px; }
+.p-price-wrap { display: flex; align-items: flex-end; gap: 4px; margin-bottom: 6px; }
+.p-currency { font-size: 16px; font-weight: 400; color: var(--text-muted); margin-bottom: 10px; }
+.p-price { font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+.p-price.gold { background: linear-gradient(135deg, var(--gold-pale), var(--gold-light), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.p-unit { font-size: 12px; color: var(--text-muted); margin-bottom: 28px; }
+.p-divider { height: 1px; background: var(--border); margin: 24px 0; }
+.p-features { flex: 1; }
+.p-feature { display: flex; align-items: flex-start; gap: 12px; padding: 7px 0; font-size: 13.5px; }
+.p-feature.off { opacity: 0.32; }
+.check { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.check.yes { background: rgba(201,168,76,0.12); }
+.check.no  { background: rgba(255,255,255,0.04); }
+.p-time {
+  font-size: 12px; text-align: center; padding: 10px 16px; border-radius: 50px; margin: 24px 0;
+  background: rgba(255,255,255,0.04); color: var(--text-muted);
+}
+.p-time.gold-bg { background: rgba(201,168,76,0.08); color: var(--gold); border: 1px solid rgba(201,168,76,0.15); }
+.p-btn {
+  display: block; width: 100%; padding: 15px; border-radius: 50px; text-align: center;
+  font-size: 13.5px; font-weight: 700; letter-spacing: 0.05em; cursor: none; border: none;
+  transition: all 0.3s ease;
+}
+.p-btn.primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light) 50%, var(--gold));
+  background-size: 200% auto; color: #0A0B0E;
+}
+.p-btn.primary:hover { background-position: right center; box-shadow: 0 8px 30px rgba(201,168,76,0.4); transform: scale(1.02); }
+.p-btn.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.p-btn.outline:hover { border-color: var(--border-gold); color: var(--gold-light); }
+.p-btn.outline-gold { background: transparent; color: var(--gold-light); border: 1px solid rgba(201,168,76,0.3); }
+.p-btn.outline-gold:hover { background: rgba(201,168,76,0.06); box-shadow: 0 4px 20px rgba(201,168,76,0.2); }
+
+/* Guarantee strip */
+.guarantee-strip {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: 40px; margin-top: 64px; padding: 28px 40px; border-radius: 20px;
+  background: linear-gradient(90deg, rgba(201,168,76,0.06), rgba(201,168,76,0.03), rgba(201,168,76,0.06));
+  border: 1px solid var(--border-gold);
+}
+.g-item { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.g-icon { font-size: 20px; }
+.g-text strong { display: block; font-size: 13px; font-weight: 600; }
+.g-text span { font-size: 11px; color: var(--text-muted); }
+.g-sep { width: 1px; height: 36px; background: var(--border); }
+@media (max-width: 640px) { .g-sep { display: none; } }
+
+/* ============================================================
+   ⑥ TESTIMONIALS
+============================================================ */
+#testimonials { background: var(--dark-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.testi-header { text-align: center; margin-bottom: 64px; }
+.stars { display: flex; gap: 4px; margin-bottom: 16px; }
+.star { color: var(--gold); font-size: 16px; }
+.testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+@media (max-width: 900px) { .testi-grid { grid-template-columns: 1fr; } }
+
+.testi-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+  padding: 36px 32px; position: relative; transition: all 0.4s ease;
+  display: flex; flex-direction: column;
+}
+.testi-card:hover { transform: translateY(-4px); border-color: var(--border-gold); }
+.testi-card.featured-t { border-color: rgba(201,168,76,0.2); }
+.quote-mark {
+  font-family: 'Cormorant Garamond', serif; font-size: 80px; line-height: 0.6;
+  color: var(--gold); opacity: 0.25; margin-bottom: 20px; display: block;
+}
+.testi-text { font-size: 15px; line-height: 1.75; color: var(--text-sub); flex: 1; margin-bottom: 28px; font-style: italic; }
+.testi-author { display: flex; align-items: center; gap: 14px; }
+.author-avatar {
+  width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
+  background: var(--dark-3); border: 2px solid var(--border-gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700;
+  color: var(--gold-light);
+}
+.author-name { font-size: 14px; font-weight: 600; }
+.author-title { font-size: 12px; color: var(--text-muted); }
+.testi-rating { display: flex; gap: 2px; margin-bottom: 6px; }
+
+/* Stats bar */
+.social-proof-bar {
+  display: flex; justify-content: center; gap: 80px; flex-wrap: wrap;
+  margin-bottom: 64px; padding: 40px;
+  background: var(--dark-3); border-radius: 20px;
+  border: 1px solid var(--border);
+}
+.sp-item { text-align: center; }
+.sp-num { font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 700; color: var(--gold-light); line-height: 1; }
+.sp-label { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+/* ============================================================
+   ⑦ WHY US
+============================================================ */
+#whyus { background: var(--dark); }
+.whyus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+@media (max-width: 900px) { .whyus-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+.advantage-list { display: flex; flex-direction: column; gap: 24px; }
+.advantage-item {
+  display: flex; align-items: flex-start; gap: 20px;
+  padding: 24px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; transition: all 0.3s ease;
+}
+.advantage-item:hover { border-color: var(--border-gold); transform: translateX(8px); }
+.adv-icon {
+  width: 48px; height: 48px; flex-shrink: 0; border-radius: 12px;
+  background: rgba(201,168,76,0.08); border: 1px solid var(--border-gold);
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+}
+.adv-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.adv-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+.comparison-table {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+  overflow: hidden;
+}
+.ct-head { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--dark-3); }
+.ct-head-cell { padding: 16px 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); text-align: center; }
+.ct-head-cell.ours { color: var(--gold); }
+.ct-row { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid var(--border); }
+.ct-cell { padding: 16px 20px; font-size: 13px; color: var(--text-sub); text-align: center; }
+.ct-cell.label { text-align: left; color: var(--text-muted); font-size: 12.5px; }
+.ct-cell.yes-ours { color: var(--gold-light); font-weight: 600; }
+.ct-cell.no-comp { color: #e05555; }
+
+/* ============================================================
+   ⑧ FAQ
+============================================================ */
+#faq { background: var(--dark-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.faq-header { text-align: center; margin-bottom: 64px; }
+.faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 960px; margin: 0 auto; }
+@media (max-width: 768px) { .faq-grid { grid-template-columns: 1fr; } }
+
+.faq-item {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  overflow: hidden; transition: border-color 0.3s;
+}
+.faq-item.open { border-color: var(--border-gold); }
+.faq-q {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 24px; cursor: none; font-size: 14.5px; font-weight: 500; gap: 16px;
+}
+.faq-chevron {
+  width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
+  background: var(--dark-3); display: flex; align-items: center; justify-content: center;
+  transition: transform 0.3s, background 0.3s;
+  color: var(--text-muted); font-size: 12px;
+}
+.faq-item.open .faq-chevron { transform: rotate(180deg); background: rgba(201,168,76,0.1); color: var(--gold); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+  font-size: 13.5px; color: var(--text-muted); line-height: 1.75;
+  padding: 0 24px;
+}
+.faq-item.open .faq-a { max-height: 300px; padding-bottom: 22px; }
+
+/* ============================================================
+   ⑨ BOOKING / CTA SECTION
+============================================================ */
+#booking {
+  background: var(--dark);
+  position: relative; overflow: hidden;
+}
+.booking-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 20% 50%, rgba(201,168,76,0.03) 0%, transparent 50%);
+}
+.booking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; position: relative; z-index: 1; }
+@media (max-width: 900px) { .booking-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+.booking-form-wrap {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 40px;
+}
+.form-title { font-size: 20px; font-weight: 700; margin-bottom: 28px; }
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; background: var(--dark-3); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 18px; font-size: 14px; font-family: 'Outfit', sans-serif; color: var(--text);
+  transition: border-color 0.3s, box-shadow 0.3s; outline: none; appearance: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: rgba(201,168,76,0.5); box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+}
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+.form-select option { background: var(--dark-3); }
+.form-textarea { resize: none; min-height: 90px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+.form-submit {
+  width: 100%; padding: 16px; border-radius: 50px; border: none;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light) 50%, var(--gold));
+  background-size: 200% auto;
+  color: #0A0B0E; font-family: 'Outfit', sans-serif;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.08em;
+  cursor: none; transition: all 0.3s ease;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.form-submit:hover { background-position: right center; box-shadow: 0 8px 32px rgba(201,168,76,0.45); transform: translateY(-2px); }
+
+.wa-cta {
+  display: flex; align-items: center; gap: 12px; margin-top: 16px;
+  background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.2);
+  border-radius: 12px; padding: 14px 18px; font-size: 13px; color: #4cdc7a;
+  cursor: none; transition: all 0.3s; text-decoration: none;
+}
+.wa-cta:hover { background: rgba(37,211,102,0.12); }
+
+/* ============================================================
+   ⑩ FOOTER
+============================================================ */
+#footer {
+  background: var(--dark-2); border-top: 1px solid var(--border); padding: 80px 0 40px;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 64px; }
+@media (max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; } }
+@media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
+
+.footer-brand-desc { font-size: 14px; color: var(--text-muted); line-height: 1.75; margin-top: 16px; max-width: 280px; }
+.footer-socials { display: flex; gap: 12px; margin-top: 24px; }
+.social-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  transition: all 0.3s; cursor: none;
+}
+.social-btn:hover { border-color: var(--border-gold); background: rgba(201,168,76,0.06); }
+.footer-col-title { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 20px; }
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.footer-links a { font-size: 14px; color: var(--text-muted); transition: color 0.2s; }
+.footer-links a:hover { color: var(--gold-light); }
+.footer-bottom {
+  border-top: 1px solid var(--border); padding-top: 32px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+}
+.footer-bottom-text { font-size: 12px; color: var(--text-muted); }
+.eco-badge {
+  display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600;
+  color: var(--green); background: rgba(76,175,122,0.08); border: 1px solid rgba(76,175,122,0.2);
+  padding: 6px 14px; border-radius: 50px;
+}
+
+/* ============================================================
+   TOAST NOTIFICATION
+============================================================ */
+#toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+  background: var(--surface); border: 1px solid var(--border-gold); border-radius: 16px;
+  padding: 18px 24px; display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: translateY(120px); opacity: 0;
+  transition: all 0.4s ease; max-width: 360px;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon { font-size: 24px; flex-shrink: 0; }
+.toast-msg strong { display: block; font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.toast-msg span { font-size: 12px; color: var(--text-muted); }
+
+/* ============================================================
+   MOBILE MENU
+============================================================ */
+#mobile-menu {
+  position: fixed; inset: 0; z-index: 490; background: rgba(10,11,14,0.97);
+  backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+#mobile-menu.open { opacity: 1; pointer-events: all; }
+.mobile-links { display: flex; flex-direction: column; align-items: center; gap: 32px; }
+.mobile-links a { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 600; color: var(--text-muted); transition: color 0.2s; }
+.mobile-links a:hover { color: var(--gold-light); }
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- TOAST -->
+<div id="toast">
+  <span class="toast-icon">✅</span>
+  <div class="toast-msg">
+    <strong>Booking Terkirim!</strong>
+    <span>Tim kami akan menghubungi Anda dalam 60 menit.</span>
+  </div>
+</div>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu">
+  <nav class="mobile-links">
+    <a href="#pain" onclick="closeMobileMenu()">Masalah</a>
+    <a href="#howto" onclick="closeMobileMenu()">Cara Kerja</a>
+    <a href="#pricing" onclick="closeMobileMenu()">Paket</a>
+    <a href="#testimonials" onclick="closeMobileMenu()">Testimoni</a>
+    <a href="#booking" onclick="closeMobileMenu()">Pesan</a>
+  </nav>
+</div>
+
+<!-- ============================================================
+     NAVBAR
+============================================================ -->
+<nav id="navbar">
+  <div class="nav-logo">Auto Care<span>.</span></div>
+  <div class="nav-links">
+    <a href="#pain">Masalah</a>
+    <a href="#howto">Cara Kerja</a>
+    <a href="#pricing">Paket</a>
+    <a href="#testimonials">Testimoni</a>
+  </div>
+  <a href="#booking" class="nav-cta">Pesan Sekarang</a>
+  <div class="nav-hamburger" id="hamburger" onclick="toggleMobileMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ============================================================
+     ① HERO
+============================================================ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-orb-1"></div>
+  <div class="hero-orb-2"></div>
+
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        🌿 &nbsp; Layanan Cuci Mobil Premium · Datang ke Lokasi Anda
+      </div>
+      <h1 class="hero-title">
+        Mobil Bersih Sempurna.<br>
+        <em>Tanpa Keluar</em> Rumah.
+      </h1>
+      <p class="hero-sub">
+        Kami hadir ke garasi Anda dengan teknisi bersertifikat, produk <em>biodegradable</em>, dan sistem hemat air. Karena waktu Anda terlalu berharga untuk habis di tempat antrian.
+      </p>
+      <div class="hero-ctas">
+        <a href="#booking" class="btn-primary">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 3v1M3 12h1M20 12h1M5.6 5.6l.7.7M17.7 5.6l-.7.7M8 21h8M12 17v4"/><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/></svg>
+          Pesan Sekarang — Gratis
+        </a>
+        <a href="#pricing" class="btn-secondary">
+          Lihat Paket &nbsp;↓
+        </a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-item">
+          <span style="font-size:20px;">⭐</span>
+          <span><strong>4.9/5</strong> dari 2.000+ ulasan</span>
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-item">
+          <span style="font-size:20px;">🌿</span>
+          <span><strong>100%</strong> Eco-Friendly</span>
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-item">
+          <span style="font-size:20px;">⚡</span>
+          <span><strong>Konfirmasi</strong> &lt; 60 menit</span>
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-item">
+          <span style="font-size:20px;">🛡️</span>
+          <span><strong>Garansi</strong> Kepuasan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ② PAIN POINT
+============================================================ -->
+<section id="pain" class="section">
+  <div class="container">
+    <div class="pain-grid">
+      <div>
+        <div class="label-tag reveal">Fakta yang Menyedihkan</div>
+        <h2 class="font-display reveal delay-1" style="font-size:clamp(36px,4.5vw,60px);font-weight:700;line-height:1.1;margin-bottom:24px;">
+          Anda Sudah Cukup<br>Membuang <span class="gradient-text">3 Jam</span><br>Hanya untuk Cuci Mobil
+        </h2>
+        <p class="reveal delay-2" style="font-size:15px;color:var(--text-sub);line-height:1.8;margin-bottom:32px;">
+          Antre 45 menit. Menunggu pengerjaan 1 jam. Bensin terbuang pergi-pulang. Belum lagi stres menitipkan kendaraan kesayangan kepada orang asing. Kalau Anda punya lebih dari satu mobil — bayangkan berapa banyak waktu produktif yang hilang setiap minggunya.
+        </p>
+        <div class="reveal delay-3" style="padding:20px 24px;background:var(--dark-3);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:12px;">
+          <p style="font-size:14px;color:var(--text-sub);line-height:1.75;font-style:italic;">"Pemilik 2+ kendaraan rata-rata menghabiskan <strong style="color:var(--gold-light);">12+ jam per bulan</strong> hanya untuk antrean cuci mobil. Itu setara 6 hari kerja per tahun."</p>
+        </div>
+      </div>
+
+      <div class="pain-stat-grid">
+        <div class="stat-card reveal delay-1">
+          <div class="stat-num">3 Jam</div>
+          <div class="stat-label">Rata-rata waktu yang terbuang per kunjungan cuci mobil</div>
+        </div>
+        <div class="stat-card reveal delay-2">
+          <div class="stat-num">90%</div>
+          <div class="stat-label">Pelanggan kami mengaku lebih produktif setelah beralih</div>
+        </div>
+        <div class="stat-card reveal delay-3">
+          <div class="stat-num">2.4×</div>
+          <div class="stat-label">Air lebih hemat dengan sistem cuci kami vs konvensional</div>
+        </div>
+        <div class="stat-card reveal delay-4">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Menit harus Anda tinggalkan kenyamanan rumah Anda</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ③ SOLUTION
+============================================================ -->
+<section id="solution" class="section">
+  <div class="container">
+    <div class="solution-inner">
+      <div class="label-tag reveal">Solusi Kami</div>
+      <h2 class="font-display reveal delay-1" style="font-size:clamp(36px,4.5vw,60px);font-weight:700;line-height:1.1;margin-bottom:20px;">
+        Inilah Cara Baru<br><span class="gradient-text">Merawat Kendaraan Anda</span>
+      </h2>
+      <p class="reveal delay-2" style="font-size:15px;color:var(--text-sub);line-height:1.8;">
+        Auto Care menghadirkan armada mobile profesional langsung ke depan pintu Anda. Tim kami bekerja transparan di bawah pengawasan Anda — menggunakan peralatan canggih dan produk eco-friendly standar internasional.
+      </p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card reveal delay-1">
+        <div class="feature-icon">🌿</div>
+        <div class="feature-title">100% Ramah Lingkungan</div>
+        <div class="feature-desc">Produk biodegradable pH-neutral yang aman untuk cat kendaraan sekaligus tidak merusak ekosistem. Hemat air hingga 90% dibanding cuci konvensional.</div>
+      </div>
+      <div class="feature-card reveal delay-2">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-title">Transparan di Depan Mata</div>
+        <div class="feature-desc">Seluruh proses pengerjaan dilakukan di garasi Anda. Tidak ada yang tersembunyi — Anda bisa mengawasi langsung setiap langkahnya.</div>
+      </div>
+      <div class="feature-card reveal delay-3">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Efisiensi Waktu Ekstrem</div>
+        <div class="feature-desc">Dari booking hingga kendaraan bersih, Anda tidak perlu ke mana-mana. Konfirmasi booking diterima kurang dari 60 menit.</div>
+      </div>
+      <div class="feature-card reveal delay-1">
+        <div class="feature-icon">🏆</div>
+        <div class="feature-title">Teknisi Bersertifikat</div>
+        <div class="feature-desc">Setiap teknisi melewati pelatihan intensif, uji kelayakan, dan background check. Berseragam, profesional, dan bertanggung jawab.</div>
+      </div>
+      <div class="feature-card reveal delay-2">
+        <div class="feature-icon">📱</div>
+        <div class="feature-title">Booking Digital Mudah</div>
+        <div class="feature-desc">Pesan melalui website, WhatsApp, atau aplikasi mobile. Pilih jadwal, lokasi, dan paket dalam hitungan menit.</div>
+      </div>
+      <div class="feature-card reveal delay-3">
+        <div class="feature-icon">🛡️</div>
+        <div class="feature-title">Garansi Kepuasan Penuh</div>
+        <div class="feature-desc">Tidak puas dengan hasil pengerjaan? Kami akan mengerjakan ulang tanpa biaya tambahan apapun. Tanpa pertanyaan rumit.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ④ HOW IT WORKS
+============================================================ -->
+<section id="howto" class="section">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:72px;">
+      <div class="label-tag reveal" style="justify-content:center;">Cara Kerja</div>
+      <h2 class="font-display reveal delay-1" style="font-size:clamp(36px,4.5vw,60px);font-weight:700;line-height:1.1;">
+        Semudah <span class="gradient-text">1 — 2 — 3</span>
+      </h2>
+    </div>
+
+    <div class="steps-wrapper">
+      <div class="step-item reveal delay-1">
+        <div class="step-num">1</div>
+        <h3 class="step-title">Pilih & Pesan</h3>
+        <p class="step-desc">Pilih paket yang sesuai, tentukan tanggal, waktu, dan lokasi Anda. Booking bisa melalui website, WhatsApp, atau aplikasi. Konfirmasi tiba dalam kurang dari 60 menit.</p>
+      </div>
+      <div class="step-item reveal delay-2">
+        <div class="step-num">2</div>
+        <h3 class="step-title">Kami Datang ke Anda</h3>
+        <p class="step-desc">Teknisi bersertifikat tiba tepat waktu di garasi Anda lengkap dengan semua perlengkapan. Pengerjaan dilakukan transparan di depan mata Anda — tidak ada yang disembunyikan.</p>
+      </div>
+      <div class="step-item reveal delay-3">
+        <div class="step-num">3</div>
+        <h3 class="step-title">Bersih. Selesai. Bayar.</h3>
+        <p class="step-desc">Kendaraan selesai dikerjakan. Anda melakukan inspeksi bersama teknisi. Bayar secara digital dengan mudah. Selesai — tanpa perlu pergi ke mana pun.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ============================================================
+     ⑤ PRICING
+============================================================ -->
+<section id="pricing" class="section">
+  <div class="container">
+    <div class="pricing-header">
+      <div class="label-tag reveal" style="justify-content:center;">Paket Layanan</div>
+      <h2 class="font-display reveal delay-1" style="font-size:clamp(36px,4.5vw,60px);font-weight:700;line-height:1.1;margin-bottom:16px;">
+        Investasi dalam <span class="gradient-text">Waktu & Kemewahan</span>
+      </h2>
+      <p class="reveal delay-2" style="font-size:15px;color:var(--text-sub);max-width:520px;margin:0 auto;">
+        Setiap paket menggunakan produk biodegradable premium dan dikerjakan oleh teknisi bersertifikat langsung di lokasi Anda.
+      </p>
+      <div class="reveal delay-3" style="margin-top:32px;">
+        <div class="toggle-pill">
+          <button class="toggle-btn active" onclick="setToggle(this,'once')">Sekali Kunjung</button>
+          <button class="toggle-btn" onclick="setToggle(this,'sub')">Berlangganan &nbsp;<span class="savings-badge">Hemat 20%</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- REGULER -->
+      <div class="p-card reveal delay-1">
+        <div class="p-tier">Paket</div>
+        <div class="p-name">Reguler</div>
+        <div class="p-desc">Perawatan esensial harian untuk tampilan kendaraan yang selalu segar.</div>
+        <div class="p-price-wrap">
+          <span class="p-currency">Rp</span>
+          <span class="p-price" data-once="75.000" data-sub="60.000">75.000</span>
+        </div>
+        <div class="p-unit">per kunjungan · 1 kendaraan</div>
+        <div class="p-divider"></div>
+        <ul class="p-features">
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Eksterior Body Wash</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Pembersihan Velg & Ban</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Lap & Pengeringan Manual</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Pembersih Kaca (luar)</li>
+          <li class="p-feature off"><span class="check no"><svg width="10" height="10" fill="none" viewBox="0 0 10 10"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="#666" stroke-width="1.5" stroke-linecap="round"/></svg></span>Interior Vacuum & Wipe</li>
+          <li class="p-feature off"><span class="check no"><svg width="10" height="10" fill="none" viewBox="0 0 10 10"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="#666" stroke-width="1.5" stroke-linecap="round"/></svg></span>Engine Bay Cleaning</li>
+          <li class="p-feature off"><span class="check no"><svg width="10" height="10" fill="none" viewBox="0 0 10 10"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="#666" stroke-width="1.5" stroke-linecap="round"/></svg></span>Paint Ceramic Coating</li>
+        </ul>
+        <div class="p-time">⏱ Estimasi ~45 menit</div>
+        <button class="p-btn outline" onclick="selectPackage('Reguler')">Pesan Paket Ini</button>
+      </div>
+
+      <!-- PREMIUM (featured) -->
+      <div class="p-card featured reveal delay-2">
+        <div class="p-card-glow"></div>
+        <div class="popular-badge">🏆 PALING POPULER</div>
+        <div class="p-tier gold">Paket</div>
+        <div class="p-name gradient-text">Premium</div>
+        <div class="p-desc">Perawatan menyeluruh luar-dalam untuk kenyamanan dan penampilan maksimal.</div>
+        <div class="p-price-wrap">
+          <span class="p-currency" style="color:var(--gold-light);">Rp</span>
+          <span class="p-price gold" data-once="150.000" data-sub="120.000">150.000</span>
+        </div>
+        <div class="p-unit">per kunjungan · 1 kendaraan</div>
+        <div class="p-divider"></div>
+        <ul class="p-features">
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span><strong>Semua fitur Reguler</strong></li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Interior Vacuum & Dashboard Wipe</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Cuci Kaca Film & Karet Pintu</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Tire Shine & Body Wax</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Parfum Interior Premium</li>
+          <li class="p-feature off"><span class="check no"><svg width="10" height="10" fill="none" viewBox="0 0 10 10"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="#666" stroke-width="1.5" stroke-linecap="round"/></svg></span>Engine Bay Cleaning</li>
+          <li class="p-feature off"><span class="check no"><svg width="10" height="10" fill="none" viewBox="0 0 10 10"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="#666" stroke-width="1.5" stroke-linecap="round"/></svg></span>Paint Ceramic Coating</li>
+        </ul>
+        <div class="p-time gold-bg">⏱ Estimasi ~75 menit</div>
+        <button class="p-btn primary" onclick="selectPackage('Premium')">Pesan Paket Ini</button>
+      </div>
+
+      <!-- ULTIMATE -->
+      <div class="p-card reveal delay-3">
+        <div class="p-tier">Paket</div>
+        <div class="p-name">Ultimate</div>
+        <div class="p-desc">Detailing lengkap standar pameran otomotif — untuk pecinta kendaraan sejati.</div>
+        <div class="p-price-wrap">
+          <span class="p-currency">Rp</span>
+          <span class="p-price" data-once="300.000+" data-sub="240.000+">300.000+</span>
+        </div>
+        <div class="p-unit">per kunjungan · 1 kendaraan</div>
+        <div class="p-divider"></div>
+        <ul class="p-features">
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span><strong>Semua fitur Premium</strong></li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Engine Bay Deep Cleaning</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Clay Bar & Paint Decontamination</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Paint Sealant Ceramic Coating</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Leather Seat Conditioning</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Laporan Kondisi Kendaraan PDF</li>
+          <li class="p-feature"><span class="check yes"><svg width="10" height="10" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/></svg></span>Dedicated Senior Technician</li>
+        </ul>
+        <div class="p-time">⏱ Estimasi 2–3 jam</div>
+        <button class="p-btn outline-gold" onclick="selectPackage('Ultimate')">Konsultasi & Pesan</button>
+      </div>
+    </div>
+
+    <!-- Guarantee Strip -->
+    <div class="guarantee-strip reveal delay-2">
+      <div class="g-item"><span class="g-icon">🛡️</span><div class="g-text"><strong>Garansi Kepuasan</strong><span>Tidak puas? Kami kerjakan ulang gratis</span></div></div>
+      <div class="g-sep"></div>
+      <div class="g-item"><span class="g-icon">🌿</span><div class="g-text"><strong>100% Eco-Friendly</strong><span>Biodegradable & hemat air 90%</span></div></div>
+      <div class="g-sep"></div>
+      <div class="g-item"><span class="g-icon">⚡</span><div class="g-text"><strong>Konfirmasi Instan</strong><span>Booking dikonfirmasi &lt; 60 menit</span></div></div>
+      <div class="g-sep"></div>
+      <div class="g-item"><span class="g-icon">❌</span><div class="g-text"><strong>Batal Gratis</strong><span>Hingga 2 jam sebelum jadwal</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ⑥ TESTIMONIALS
+============================================================ -->
+<section id="testimonials" class="section">
+  <div class="container">
+    <div class="testi-header">
+      <div class="label-tag reveal" style="justify-content:center;">Testimoni</div>
+      <h2 class="font-display reveal delay-1" style="font-size:clamp(36px,4.5vw,60px);font-weight:700;line-height:1.1;margin-bottom:48px;">
+        Dipercaya <span class="gradient-text">Ribuan</span> Pemilik Kendaraan Premium
+      </h2>
+
+      <!-- Social Proof Stats -->
+      <div class="social-proof-bar reveal delay-2">
+        <div class="sp-item"><div class="sp-num">2.000+</div><div class="sp-label">Pelanggan Aktif</div></div>
+        <div class="sp-item"><div class="sp-num">4.9★</div><div class="sp-label">Rating Rata-rata</div></div>
+        <div class="sp-item"><div class="sp-num">98%</div><div class="sp-label">Tingkat Kepuasan</div></div>
+        <div class="sp-item"><div class="sp-num">7×</div><div class="sp-label">Rata-rata Kunjungan Ulang</div></div>
+      </div>
+    </div>
+
+    <div class="testi-grid">
+      <div class="testi-card featured-t reveal delay-1">
+        <div class="testi-rating">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <span class="quote-mark">"</span>
+        <p class="testi-text">Saya punya 3 mobil dan dulu habiskan hampir satu hari Sabtu penuh untuk semua ke bengkel cuci. Sekarang semua beres sebelum saya selesai sarapan. Ini bukan sekadar cuci mobil — ini mengubah cara saya mengelola waktu.</p>
+        <div class="testi-author">
+          <div class="author-avatar">R</div>
+          <div>
+            <div class="author-name">Rizky Pratama</div>
+            <div class="author-title">Direktur Keuangan · Jakarta Selatan</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card reveal delay-2">
+        <div class="testi-rating">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <span class="quote-mark">"</span>
+        <p class="testi-text">Anak-anak tidak perlu saya tinggal, suami tidak perlu repot antar-jemput. Tim mereka profesional, bersih, dan tepat waktu. Paket Ultimate untuk SUV saya hasilnya luar biasa — seperti baru keluar dari showroom.</p>
+        <div class="testi-author">
+          <div class="author-avatar">S</div>
+          <div>
+            <div class="author-name">Sari Wulandari</div>
+            <div class="author-title">Ibu Rumah Tangga · Tangerang Selatan</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card reveal delay-3">
+        <div class="testi-rating">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <span class="quote-mark">"</span>
+        <p class="testi-text">Sebagai pecinta otomotif, saya sangat pilih-pilih soal siapa yang boleh sentuh mobil saya. Auto Care adalah satu-satunya yang lolos standar komunitas JDM kami. Produknya premium, teknisinya paham otomotif.</p>
+        <div class="testi-author">
+          <div class="author-avatar">A</div>
+          <div>
+            <div class="author-name">Andi Kurniawan</div>
+            <div class="author-title">Komunitas JDM Indonesia · Bandung</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ⑦ WHY US
+============================================================ -->
+<section id="whyus" class="section" style="background:var(--dark-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="whyus-grid">
+      <div>
+        <div class="label-tag reveal">Mengapa Kami</div>
+        <h2 class="font-display reveal delay-1" style="font-size:clamp(32px,4vw,56px);font-weight:700;line-height:1.1;margin-bottom:16px;">
+          Bukan Sekadar<br><span class="gradient-text">Cuci Mobil Biasa</span>
+        </h2>
+        <p class="reveal delay-2" style="font-size:14px;color:var(--text-muted);line-height:1.8;margin-bottom:36px;">Kami membangun standar baru dalam industri perawatan kendaraan di Indonesia. Bandingkan kami dengan layanan konvensional:</p>
+
+        <div class="advantage-list">
+          <div class="advantage-item reveal delay-2">
+            <div class="adv-icon">⏰</div>
+            <div>
+              <div class="adv-title">Zero Waktu Terbuang</div>
+              <div class="adv-desc">Tidak ada antrean, tidak ada perjalanan. Gunakan waktu tersebut untuk hal yang benar-benar penting bagi Anda.</div>
+            </div>
+          </div>
+          <div class="advantage-item reveal delay-3">
+            <div class="adv-icon">💧</div>
+            <div>
+              <div class="adv-title">Sistem Hemat Air Eksklusif</div>
+              <div class="adv-desc">Teknologi steam dan microfiber kami menggunakan 90% lebih sedikit air tanpa mengorbankan hasil akhir.</div>
+            </div>
+          </div>
+          <div class="advantage-item reveal delay-4">
+            <div class="adv-icon">📋</div>
+            <div>
+              <div class="adv-title">Laporan Kondisi Kendaraan</div>
+              <div class="adv-desc">Paket Ultimate menyertakan laporan kondisi kendaraan dalam format PDF — transparansi penuh tentang kondisi mobil Anda.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Table -->
+      <div class="comparison-table reveal delay-2">
+        <div class="ct-head">
+          <div class="ct-head-cell" style="text-align:left;">Fitur</div>
+          <div class="ct-head-cell ours">Auto Care</div>
+          <div class="ct-head-cell">Konvensional</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell label">Tidak perlu keluar rumah</div>
+          <div class="ct-cell yes-ours">✓ Ya</div>
+          <div class="ct-cell no-comp">✗ Tidak</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell label">Tanpa antrean</div>
+          <div class="ct-cell yes-ours">✓ Ya</div>
+          <div class="ct-cell no-comp">✗ Tidak</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell label">Produk eco-friendly</div>
+          <div class="ct-cell yes-ours">✓ 100%</div>
+          <div class="ct-cell no-comp">✗ Jarang</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell label">Teknisi tersertifikat</div>
+          <div class="ct-cell yes-ours">✓ Ya</div>
+          <div class="ct-cell" style="color:var(--text-muted);">~ Varies</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell label">Booking digital</div>
+          <div class="ct-cell yes-ours">✓ Ya</div>
+          <div class="ct-cell no-comp">✗ Tidak</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell label">Garansi kepuasan</div>
+          <div class="ct-cell yes-ours">✓ Ya</div>
+          <div class="ct-cell no-comp">✗ Tidak</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell label">Laporan kondisi mobil</div>
+          <div class="ct-cell yes-ours">✓ Ultimate</div>
+          <div class="ct-cell no-comp">✗ Tidak</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell label">Hemat air 90%</div>
+          <div class="ct-cell yes-ours">✓ Ya</div>
+          <div class="ct-cell no-comp">✗ Tidak</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ⑧ FAQ
+============================================================ -->
+<section id="faq" class="section">
+  <div class="container">
+    <div class="faq-header">
+      <div class="label-tag reveal" style="justify-content:center;">FAQ</div>
+      <h2 class="font-display reveal delay-1" style="font-size:clamp(36px,4.5vw,60px);font-weight:700;line-height:1.1;">
+        Pertanyaan yang <span class="gradient-text">Sering Ditanyakan</span>
+      </h2>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item reveal delay-1" onclick="toggleFaq(this)">
+        <div class="faq-q">Apakah layanan tersedia di hari libur?<span class="faq-chevron">▼</span></div>
+        <div class="faq-a">Ya, kami beroperasi 7 hari seminggu termasuk hari libur nasional, mulai pukul 07.00 hingga 19.00. Jadwal akhir pekan dan libur sangat populer — disarankan untuk booking 1-2 hari sebelumnya.</div>
+      </div>
+      <div class="faq-item reveal delay-2" onclick="toggleFaq(this)">
+        <div class="faq-q">Bagaimana jika cuaca hujan saat jadwal saya?<span class="faq-chevron">▼</span></div>
+        <div class="faq-a">Kami akan menghubungi Anda maksimal H-1 untuk penjadwalan ulang tanpa biaya apapun. Keselamatan tim dan kualitas pengerjaan adalah prioritas kami.</div>
+      </div>
+      <div class="faq-item reveal delay-1" onclick="toggleFaq(this)">
+        <div class="faq-q">Apakah produk yang digunakan aman untuk cat mobil?<span class="faq-chevron">▼</span></div>
+        <div class="faq-a">100% aman. Kami hanya menggunakan produk pH-neutral biodegradable yang telah melalui uji standar internasional. Produk kami tidak merusak lapisan cat, wax, atau coating apapun pada kendaraan Anda.</div>
+      </div>
+      <div class="faq-item reveal delay-2" onclick="toggleFaq(this)">
+        <div class="faq-q">Berapa lama waktu pengerjaan masing-masing paket?<span class="faq-chevron">▼</span></div>
+        <div class="faq-a">Paket Reguler sekitar 45 menit, Paket Premium sekitar 75 menit, dan Paket Ultimate antara 2-3 jam tergantung kondisi kendaraan. Anda bisa beraktivitas normal selama pengerjaan berlangsung.</div>
+      </div>
+      <div class="faq-item reveal delay-1" onclick="toggleFaq(this)">
+        <div class="faq-q">Apakah saya perlu menyiapkan sesuatu sebelum teknisi datang?<span class="faq-chevron">▼</span></div>
+        <div class="faq-a">Tidak perlu. Tim kami membawa semua perlengkapan yang dibutuhkan. Pastikan hanya akses ke kendaraan dan area kerja minimal 2×3 meter tersedia. Kami yang urus sisanya.</div>
+      </div>
+      <div class="faq-item reveal delay-2" onclick="toggleFaq(this)">
+        <div class="faq-q">Bagaimana cara pembayaran?<span class="faq-chevron">▼</span></div>
+        <div class="faq-a">Kami menerima semua metode pembayaran digital: transfer bank, GoPay, OVO, DANA, QRIS, dan kartu kredit/debit. Pembayaran dilakukan setelah pengerjaan selesai dan Anda puas dengan hasilnya.</div>
+      </div>
+      <div class="faq-item reveal delay-1" onclick="toggleFaq(this)">
+        <div class="faq-q">Bagaimana jika saya tidak puas dengan hasilnya?<span class="faq-chevron">▼</span></div>
+        <div class="faq-a">Garansi kepuasan penuh — kami akan mengerjakan ulang area yang bermasalah tanpa biaya tambahan. Jika tetap tidak puas, kami akan memberikan pengembalian dana penuh. Kepuasan Anda adalah prioritas kami.</div>
+      </div>
+      <div class="faq-item reveal delay-2" onclick="toggleFaq(this)">
+        <div class="faq-q">Apakah layanan tersedia untuk motor dan kendaraan besar?<span class="faq-chevron">▼</span></div>
+        <div class="faq-a">Ya, kami melayani motor, sedan, SUV/MPV, hingga van dan minibus. Untuk kendaraan di atas ukuran SUV standar, mungkin ada penyesuaian harga. Hubungi kami untuk konsultasi dan penawaran khusus.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ⑨ BOOKING / CTA
+============================================================ -->
+<section id="booking" class="section" style="background:var(--dark-2);border-top:1px solid var(--border);">
+  <div class="booking-bg"></div>
+  <div class="container">
+    <div class="booking-grid">
+      <!-- Left: CTA Copy -->
+      <div>
+        <div class="label-tag reveal">Booking Sekarang</div>
+        <h2 class="font-display reveal delay-1" style="font-size:clamp(36px,4.5vw,60px);font-weight:700;line-height:1.05;margin-bottom:24px;">
+          Waktu Anda Terlalu<br>Berharga untuk<br><em style="color:var(--gold-light);">Terbuang di Antrian</em>
+        </h2>
+        <p class="reveal delay-2" style="font-size:15px;color:var(--text-sub);line-height:1.8;margin-bottom:40px;">
+          Bergabunglah dengan 2.000+ pemilik kendaraan cerdas yang sudah beralih ke cara yang lebih efisien. Isi form booking di samping atau hubungi kami langsung via WhatsApp.
+        </p>
+        <div class="reveal delay-3" style="display:flex;flex-direction:column;gap:16px;">
+          <div style="display:flex;align-items:center;gap:14px;padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:14px;">
+            <span style="font-size:24px;">📍</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:3px;">Layanan Area Jabodetabek</div>
+              <div style="font-size:12px;color:var(--text-muted);">Jakarta, Bogor, Depok, Tangerang, Bekasi & sekitarnya</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:14px;">
+            <span style="font-size:24px;">🕖</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:3px;">Operasional 7 Hari Seminggu</div>
+              <div style="font-size:12px;color:var(--text-muted);">Senin–Minggu, pukul 07.00–19.00 WIB</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:14px;">
+            <span style="font-size:24px;">💳</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:3px;">Bayar Setelah Selesai</div>
+              <div style="font-size:12px;color:var(--text-muted);">Tanpa DP · Batal gratis hingga 2 jam sebelumnya</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Form -->
+      <div class="booking-form-wrap reveal delay-2">
+        <div class="form-title">Jadwalkan Kunjungan Anda</div>
+        <form id="bookingForm" onsubmit="handleSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nama Lengkap *</label>
+              <input type="text" class="form-input" placeholder="Budi Santoso" required id="f-name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">No. WhatsApp *</label>
+              <input type="tel" class="form-input" placeholder="08xx-xxxx-xxxx" required id="f-phone">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Alamat Lengkap *</label>
+            <input type="text" class="form-input" placeholder="Jl. Contoh No. 10, Jakarta Selatan" required id="f-address">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Pilih Paket *</label>
+              <select class="form-select" required id="f-package">
+                <option value="">— Pilih Paket —</option>
+                <option value="Reguler">Reguler (Rp 75.000)</option>
+                <option value="Premium">Premium (Rp 150.000) ⭐</option>
+                <option value="Ultimate">Ultimate (Rp 300.000+)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tanggal Kunjungan *</label>
+              <input type="date" class="form-input" required id="f-date">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Slot Waktu *</label>
+              <select class="form-select" required id="f-time">
+                <option value="">— Pilih Waktu —</option>
+                <option>07:00 – 09:00</option>
+                <option>09:00 – 11:00</option>
+                <option>11:00 – 13:00</option>
+                <option>13:00 – 15:00</option>
+                <option>15:00 – 17:00</option>
+                <option>17:00 – 19:00</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Jenis Kendaraan</label>
+              <select class="form-select" id="f-car">
+                <option value="">— Pilih —</option>
+                <option>Sedan / Hatchback</option>
+                <option>SUV / MPV</option>
+                <option>Van / Minibus</option>
+                <option>Motor / Sport Bike</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Catatan Tambahan</label>
+            <textarea class="form-textarea" placeholder="Kondisi khusus, akses lokasi, permintaan spesifik..." id="f-note"></textarea>
+          </div>
+          <button type="submit" class="form-submit">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Kirim Booking Sekarang
+          </button>
+        </form>
+        <a class="wa-cta" href="https://wa.me/6287847389888" target="_blank">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="#4cdc7a"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.818.487 3.52 1.337 4.99L2 22l5.18-1.326A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" stroke="#4cdc7a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Atau chat langsung via WhatsApp &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ⑩ FOOTER
+============================================================ -->
+<footer id="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="nav-logo" style="font-size:24px;">Auto Care<span style="color:var(--gold);">.</span></div>
+        <p class="footer-brand-desc">Layanan cuci mobil premium yang hadir ke garasi Anda. Efisien, transparan, dan ramah lingkungan.</p>
+        <div class="footer-socials">
+          <a class="social-btn" href="#" title="Instagram">📸</a>
+          <a class="social-btn" href="#" title="TikTok">🎵</a>
+          <a class="social-btn" href="#" title="WhatsApp">💬</a>
+          <a class="social-btn" href="#" title="Facebook">📘</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Layanan</div>
+        <ul class="footer-links">
+          <li><a href="#pricing">Paket Reguler</a></li>
+          <li><a href="#pricing">Paket Premium</a></li>
+          <li><a href="#pricing">Paket Ultimate</a></li>
+          <li><a href="#pricing">Berlangganan</a></li>
+          <li><a href="#">Layanan Korporat</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Perusahaan</div>
+        <ul class="footer-links">
+          <li><a href="#">Tentang Kami</a></li>
+          <li><a href="#">Tim & Teknisi</a></li>
+          <li><a href="#">Karir</a></li>
+          <li><a href="#">Kemitraan</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Bantuan</div>
+        <ul class="footer-links">
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#">Syarat & Ketentuan</a></li>
+          <li><a href="#">Kebijakan Privasi</a></li>
+          <li><a href="#">Hubungi Kami</a></li>
+          <li><a href="#">Area Layanan</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-bottom-text">© 2025 Auto Care Perawatan Kendaraan. Seluruh hak dilindungi.</span>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <span class="eco-badge">🌿 Carbon Neutral Committed</span>
+        <span class="footer-bottom-text">Dibuat dengan ❤️ di Indonesia</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+/* --- CUSTOM CURSOR --- */
+const dot  = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+function animateCursor() {
+  ringX += (mouseX - ringX) * 0.14;
+  ringY += (mouseY - ringY) * 0.14;
+  if (dot)  { dot.style.left  = mouseX + 'px'; dot.style.top  = mouseY + 'px'; }
+  if (ring) { ring.style.left = ringX  + 'px'; ring.style.top = ringY  + 'px'; }
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+document.querySelectorAll('a, button, .faq-item, .p-card, .testi-card, .stat-card, .advantage-item').forEach(el => {
+  el.addEventListener('mouseenter', () => ring && ring.classList.add('hovered'));
+  el.addEventListener('mouseleave', () => ring && ring.classList.remove('hovered'));
+});
+
+/* --- NAVBAR SCROLL --- */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+/* --- MOBILE MENU --- */
+let menuOpen = false;
+function toggleMobileMenu() {
+  menuOpen = !menuOpen;
+  document.getElementById('mobile-menu').classList.toggle('open', menuOpen);
+}
+function closeMobileMenu() {
+  menuOpen = false;
+  document.getElementById('mobile-menu').classList.remove('open');
+}
+
+/* --- SCROLL REVEAL (IntersectionObserver) --- */
+const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+revealEls.forEach(el => obs.observe(el));
+
+/* --- PRICING TOGGLE --- */
+let pricingMode = 'once';
+function setToggle(btn, mode) {
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  pricingMode = mode;
+  document.querySelectorAll('.p-price').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(-8px)';
+    setTimeout(() => {
+      el.textContent = el.getAttribute('data-' + mode);
+      el.style.transition = 'opacity 0.3s, transform 0.3s';
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }, 180);
+  });
+}
+
+/* --- SELECT PACKAGE (from pricing card) --- */
+function selectPackage(name) {
+  const select = document.getElementById('f-package');
+  if (select) {
+    for (let i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === name) { select.selectedIndex = i; break; }
+    }
+  }
+  document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* --- FAQ ACCORDION --- */
+function toggleFaq(item) {
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* --- BOOKING FORM SUBMIT --- */
+function handleSubmit(e) {
+  e.preventDefault();
+  const name    = document.getElementById('f-name').value;
+  const phone   = document.getElementById('f-phone').value;
+  const address = document.getElementById('f-address').value;
+  const pkg     = document.getElementById('f-package').value;
+  const date    = document.getElementById('f-date').value;
+  const time    = document.getElementById('f-time').value;
+  const car     = document.getElementById('f-car').value;
+  const note    = document.getElementById('f-note').value;
+
+  /* Build WhatsApp message */
+  const msg = encodeURIComponent(
+    `✅ *BOOKING BARU — Auto Care*\n\n` +
+    `👤 Nama: ${name}\n` +
+    `📱 WhatsApp: ${phone}\n` +
+    `📍 Alamat: ${address}\n` +
+    `🚗 Kendaraan: ${car || 'Tidak disebutkan'}\n` +
+    `📦 Paket: ${pkg}\n` +
+    `📅 Tanggal: ${date}\n` +
+    `⏰ Waktu: ${time}\n` +
+    `📝 Catatan: ${note || '-'}\n\n` +
+    `Mohon dikonfirmasi. Terima kasih!`
+  );
+
+  /* Show toast */
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 4500);
+
+  /* Open WhatsApp in 1 second */
+  setTimeout(() => {
+    window.open(`https://wa.me/6287847389888?text=${msg}`, '_blank');
+  }, 1000);
+
+  /* Reset form */
+  e.target.reset();
+}
+
+/* --- SET MIN DATE (today) --- */
+const dateInput = document.getElementById('f-date');
+if (dateInput) {
+  const today = new Date().toISOString().split('T')[0];
+  dateInput.setAttribute('min', today);
+}
+
+/* --- SMOOTH SCROLL for anchor links --- */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+</body>
+</html>
