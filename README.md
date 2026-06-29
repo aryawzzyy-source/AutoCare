@@ -1,2 +1,0 @@
-# AutoCare
-Cucikilap
